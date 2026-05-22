@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RBX Store - Cek Pesanan Aman</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for elegant readability -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons for graphics -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a; /* Neutral-950 dark background */
+        }
+        /* Custom Scrollbar for sleek aesthetic */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #171717;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #404040;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #525252;
+        }
+    </style>
+</head>
+<body class="text-neutral-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden pb-12">
+
+    <!-- Header/Navigation Bar -->
+    <header class="border-b border-neutral-800 bg-neutral-900/80 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <!-- Logo di kiri atas telah dihapus, menyisakan teks saja -->
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-wider text-white">RBX<span class="text-neutral-400">SECURE</span></h1>
+                    <p class="text-xs text-neutral-500 font-medium">Sistem Pelacak Pesanan Aman</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="flex h-2 w-2 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="text-xs text-neutral-400 font-medium tracking-wide bg-neutral-800 px-2.5 py-1 rounded-full border border-neutral-700/50">Sistem Aktif</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-8 flex flex-col items-center justify-start gap-8 z-10">
+        
+        <!-- Welcome Hero Section -->
+        <div class="text-center max-w-xl mx-auto space-y-3 mt-4">
+            <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
+                Lacak Status Pesanan <span class="text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 via-neutral-300 to-neutral-500">Robux Anda</span>
+            </h2>
+            <p class="text-neutral-400 text-sm md:text-base">
+                Masukkan nama pemesan atau ID pesanan unik Anda untuk melihat perkembangan proses pengiriman Robux secara instan dan real-time.
+            </p>
+        </div>
+
+        <!-- Order Checker Interface -->
+        <div class="w-full max-w-2xl bg-neutral-900 border border-neutral-800 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+            <!-- Subtle background effect -->
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="space-y-6 relative">
+                <!-- Search Box Form -->
+                <div>
+                    <label for="searchInput" class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2">Nama Pemesan / ID Pesanan</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-neutral-500">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="searchInput" placeholder="Contoh: BudiRoblox atau RBX-1029" 
+                            class="w-full bg-neutral-950 border border-neutral-800 focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500 rounded-xl py-3.5 pl-11 pr-4 text-white placeholder-neutral-600 transition duration-200 outline-none font-medium">
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3">
+                    <button onclick="handleSearchOrder()" class="flex-grow bg-white hover:bg-neutral-200 text-neutral-950 font-bold py-3.5 px-6 rounded-xl transition duration-200 shadow-md flex items-center justify-center gap-2 text-sm md:text-base">
+                        <i class="fa-solid fa-circle-notch animate-spin hidden" id="searchSpinner"></i>
+                        <i class="fa-solid fa-magnifying-glass" id="searchIcon"></i>
+                        Cari Pesanan
+                    </button>
+                    <button onclick="clearSearch()" class="bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-semibold py-3.5 px-5 rounded-xl transition duration-200 border border-neutral-700 flex items-center justify-center text-sm md:text-base" title="Reset">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Results Output Area -->
+            <div id="searchResultArea" class="mt-8 pt-6 border-t border-neutral-800/80 hidden">
+                <!-- Dynamic Results Rendered Here -->
+            </div>
+        </div>
+
+        <!-- Admin Panel Dashboard (Controlled dynamically via password in search bar) -->
+        <div id="adminPanelArea" class="w-full max-w-4xl bg-neutral-900 border border-neutral-800 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden hidden">
+            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <!-- Admin Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-neutral-800 relative">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2 py-0.5 text-[10px] font-bold tracking-widest bg-white text-neutral-950 rounded uppercase">ADMIN CONTROL</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Kelola Sistem Pesanan</h3>
+                    <p class="text-xs text-neutral-400">Tambah, Edit status, atau Hapus pesanan Robux pelanggan.</p>
+                </div>
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <button onclick="openAddModal()" class="flex-grow md:flex-grow-0 bg-white hover:bg-neutral-200 text-neutral-950 font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-plus"></i> Tambah Pesanan
+                    </button>
+                    <button onclick="logoutAdmin()" class="bg-neutral-800 hover:bg-red-950/40 hover:text-red-400 hover:border-red-900 text-neutral-300 font-semibold py-2 px-4 rounded-lg transition duration-200 border border-neutral-700 flex items-center justify-center gap-2 text-sm" title="Keluar Admin">
+                        <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Analytics Info -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-6 relative">
+                <div class="bg-neutral-950/50 border border-neutral-850 p-4 rounded-xl">
+                    <p class="text-xs text-neutral-500 font-medium">Total Pesanan</p>
+                    <h4 class="text-2xl font-bold text-white mt-1" id="statTotal">0</h4>
+                </div>
+                <div class="bg-neutral-950/50 border border-neutral-850 p-4 rounded-xl">
+                    <p class="text-xs text-neutral-500 font-medium">Lunas</p>
+                    <h4 class="text-2xl font-bold text-emerald-400 mt-1" id="statLunas">0</h4>
+                </div>
+                <div class="bg-neutral-950/50 border border-neutral-850 p-4 rounded-xl">
+                    <p class="text-xs text-neutral-500 font-medium">Siap Dikirim</p>
+                    <h4 class="text-2xl font-bold text-amber-400 mt-1" id="statSiapKirim">0</h4>
+                </div>
+                <div class="bg-neutral-950/50 border border-neutral-850 p-4 rounded-xl">
+                    <p class="text-xs text-neutral-500 font-medium">Robux Pending</p>
+                    <h4 class="text-2xl font-bold text-emerald-500 mt-1" id="statPending">0</h4>
+                </div>
+            </div>
+
+            <!-- Search & Filters in Admin -->
+            <div class="flex flex-col md:flex-row gap-3 mb-4 relative">
+                <div class="relative flex-grow">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-neutral-500">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" id="adminSearchInput" oninput="renderAdminTable()" placeholder="Cari pesanan di daftar admin..." 
+                        class="w-full bg-neutral-950 border border-neutral-800 focus:border-neutral-500 focus:ring-1 focus:ring-neutral-500 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white placeholder-neutral-600 outline-none">
+                </div>
+            </div>
+
+            <!-- Orders Table Container -->
+            <div class="border border-neutral-800 rounded-xl overflow-hidden bg-neutral-950/40 relative">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-neutral-900 border-b border-neutral-800 text-[11px] font-bold tracking-wider text-neutral-400 uppercase">
+                                <th class="py-3 px-4">ID Pesanan</th>
+                                <th class="py-3 px-4">Nama Pemesan</th>
+                                <th class="py-3 px-4">Jumlah Robux</th>
+                                <th class="py-3 px-4">Status Bayar</th>
+                                <th class="py-3 px-4">Status Kirim</th>
+                                <th class="py-3 px-4 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody" class="divide-y divide-neutral-850 text-sm">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Empty State Admin Table -->
+                <div id="adminTableEmpty" class="py-12 text-center text-neutral-500 hidden">
+                    <i class="fa-solid fa-box-open text-4xl mb-3 block text-neutral-600"></i>
+                    <p class="text-sm font-medium">Belum ada data pesanan yang tersimpan.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Lama Telah Dihapus Sepenuhnya -->
+
+    <!-- MODAL 1: Add / Edit Order Modal -->
+    <div id="orderFormModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="w-full max-w-lg bg-neutral-900 border border-neutral-800 rounded-2xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeOrderFormModal()" class="absolute top-4 right-4 text-neutral-500 hover:text-white transition duration-150">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <h4 class="text-lg font-bold text-white mb-1" id="modalTitle">Tambah Pesanan Baru</h4>
+            <p class="text-xs text-neutral-400 mb-6">Silakan lengkapi formulir pendaftaran pesanan di bawah ini.</p>
+            
+            <form id="orderForm" onsubmit="saveOrder(event)" class="space-y-4">
+                <input type="hidden" id="editOrderId">
+                
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Nama Pemesan</label>
+                    <input type="text" id="formNama" required placeholder="Masukkan nama Roblox / pembeli" 
+                        class="w-full bg-neutral-950 border border-neutral-850 focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 rounded-lg py-2.5 px-3.5 text-sm text-white outline-none transition duration-150">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">ID Pesanan (Otomatis)</label>
+                        <input type="text" id="formId" readonly
+                            class="w-full bg-neutral-950/60 border border-neutral-850 rounded-lg py-2.5 px-3.5 text-sm text-neutral-400 outline-none cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Jumlah Robux</label>
+                        <input type="number" id="formJumlah" required min="1" placeholder="Contoh: 800" 
+                            class="w-full bg-neutral-950 border border-neutral-850 focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 rounded-lg py-2.5 px-3.5 text-sm text-white outline-none transition duration-150">
+                    </div>
+                </div>
+
+                <!-- Status Pembayaran Status Fields -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2">Status Pembayaran</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="relative flex items-center justify-center bg-neutral-950 border border-neutral-800 rounded-lg py-3 px-4 cursor-pointer hover:border-neutral-600 transition duration-150">
+                            <input type="radio" name="formStatusBayar" value="Lunas" required class="absolute opacity-0">
+                            <div class="text-center">
+                                <span class="block text-xs font-bold uppercase tracking-wider text-emerald-500">Lunas</span>
+                                <span class="text-[9px] text-neutral-500">Hijau</span>
+                            </div>
+                        </label>
+                        <label class="relative flex items-center justify-center bg-neutral-950 border border-neutral-800 rounded-lg py-3 px-4 cursor-pointer hover:border-neutral-600 transition duration-150">
+                            <input type="radio" name="formStatusBayar" value="Belum dibayar" required class="absolute opacity-0">
+                            <div class="text-center">
+                                <span class="block text-xs font-bold uppercase tracking-wider text-neutral-400">Belum dibayar</span>
+                                <span class="text-[9px] text-neutral-500">Abu-abu</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Status Pengiriman Robux Fields -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2">Status Pengiriman Robux</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="relative flex flex-col items-center justify-center text-center bg-neutral-950 border border-neutral-800 rounded-lg py-3 px-2 cursor-pointer hover:border-neutral-600 transition duration-150">
+                            <input type="radio" name="formStatusKirim" value="Siap dikirim" required class="absolute opacity-0">
+                            <span class="block text-[11px] font-bold uppercase text-amber-500">Siap Dikirim</span>
+                            <span class="text-[9px] text-neutral-500">Kuning</span>
+                        </label>
+                        <label class="relative flex flex-col items-center justify-center text-center bg-neutral-950 border border-neutral-800 rounded-lg py-3 px-2 cursor-pointer hover:border-neutral-600 transition duration-150">
+                            <input type="radio" name="formStatusKirim" value="Robux pending" required class="absolute opacity-0">
+                            <span class="block text-[11px] font-bold uppercase text-emerald-500">Robux Pending</span>
+                            <span class="text-[9px] text-neutral-500 font-medium">Hijau</span>
+                        </label>
+                        <label class="relative flex flex-col items-center justify-center text-center bg-neutral-950 border border-neutral-800 rounded-lg py-3 px-2 cursor-pointer hover:border-neutral-600 transition duration-150">
+                            <input type="radio" name="formStatusKirim" value="Menunggu bayar" required class="absolute opacity-0">
+                            <span class="block text-[11px] font-bold uppercase text-neutral-400">Menunggu Bayar</span>
+                            <span class="text-[9px] text-neutral-500">Abu-abu</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Extra Notes -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Catatan Pesanan (Opsional)</label>
+                    <textarea id="formCatatan" rows="2" placeholder="Masukkan catatan tambahan jika ada..." 
+                        class="w-full bg-neutral-950 border border-neutral-850 focus:border-neutral-600 focus:ring-1 focus:ring-neutral-600 rounded-lg py-2.5 px-3.5 text-sm text-white outline-none resize-none transition duration-150"></textarea>
+                </div>
+
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="closeOrderFormModal()" class="flex-1 bg-neutral-850 hover:bg-neutral-800 text-neutral-300 font-semibold py-3 px-4 rounded-xl transition duration-150 text-sm">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 bg-white hover:bg-neutral-200 text-neutral-950 font-bold py-3 px-4 rounded-xl transition duration-150 text-sm shadow-lg shadow-white/5">
+                        Simpan Data
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Custom Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl relative">
+            <button onclick="closeDeleteModal()" class="absolute top-4 right-4 text-neutral-500 hover:text-white transition duration-150">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-950/50 text-rose-400 border border-rose-900/30 flex items-center justify-center mx-auto mb-3 animate-pulse">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                </div>
+                <h4 class="text-lg font-bold text-white">Konfirmasi Hapus</h4>
+                <p class="text-xs text-neutral-400 mt-2">Apakah Anda yakin ingin menghapus pesanan <span id="deleteTargetId" class="font-mono font-bold text-white"></span>?</p>
+                <p class="text-[10px] text-neutral-500 mt-1">Tindakan ini permanen dan tidak dapat dibatalkan.</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 bg-neutral-850 hover:bg-neutral-800 text-neutral-300 font-semibold py-3 rounded-xl transition duration-150 text-sm">
+                    Batal
+                </button>
+                <button onclick="executeDelete()" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-3 rounded-xl transition duration-150 text-sm shadow-lg shadow-rose-600/10">
+                    Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION: Custom Alert Box instead of native alert() -->
+    <div id="toastContainer" class="fixed top-24 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <script>
+        // Security Settings
+        const SECRET_KEY = "cek pesanan_KEY_@123445_SUPER_SECURE_TOKEN_2026";
+        const ADMIN_PIN = "123445";
+        let isAdminAuthenticated = false;
+        let orderIdToDelete = null;
+
+        // Custom Styling Helper for selected Radio cards
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('orderForm');
+            const setupRadioBorders = (radioName) => {
+                const radios = form.querySelectorAll(`input[name="${radioName}"]`);
+                radios.forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        radios.forEach(r => {
+                            r.parentElement.classList.remove('border-white', 'bg-neutral-900');
+                            r.parentElement.classList.add('border-neutral-800', 'bg-neutral-950');
+                        });
+                        if (radio.checked) {
+                            radio.parentElement.classList.remove('border-neutral-800', 'bg-neutral-950');
+                            radio.parentElement.classList.add('border-white', 'bg-neutral-900/60');
+                        }
+                    });
+                });
+            };
+            setupRadioBorders('formStatusBayar');
+            setupRadioBorders('formStatusKirim');
+            
+            // Initial data population and setup
+            initDatabase();
+        });
+
+        /**
+         * Encrypts plain string data using simple obfuscated XOR algorithm combined with base64 string
+         * to avoid readable JSON format in application developers tab localstorage.
+         */
+        function encryptData(text) {
+            let obfuscated = "";
+            for (let i = 0; i < text.length; i++) {
+                obfuscated += String.fromCharCode(text.charCodeAt(i) ^ SECRET_KEY.charCodeAt(i % SECRET_KEY.length));
+            }
+            return btoa(unescape(encodeURIComponent(obfuscated)));
+        }
+
+        /**
+         * Decrypts scrambled cipher string back to standard readable JSON data string
+         */
+        function decryptData(cipher) {
+            if (!cipher) return "[]";
+            try {
+                let decoded = decodeURIComponent(escape(atob(cipher)));
+                let original = "";
+                for (let i = 0; i < decoded.length; i++) {
+                    original += String.fromCharCode(decoded.charCodeAt(i) ^ SECRET_KEY.charCodeAt(i % SECRET_KEY.length));
+                }
+                return original;
+            } catch (error) {
+                console.error("Data integrity issue or decryption error", error);
+                return "[]";
+            }
+        }
+
+        /**
+         * Interacts and loads data safely from the LocalStorage db
+         */
+        function getDatabase() {
+            const cipher = localStorage.getItem('rbx_sec_db');
+            if (!cipher) {
+                // Return dummy starter data if empty to preview the look easily
+                const defaultDummy = [
+                    { id: "RBX-1209", nama: "RezaGamer", jumlahRobux: 800, statusBayar: "Lunas", statusKirim: "Robux pending", catatan: "Pengiriman instan via group payout", tgl: "2026-05-20" },
+                    { id: "RBX-1543", nama: "RizkyX", jumlahRobux: 1500, statusBayar: "Belum dibayar", statusKirim: "Menunggu bayar", catatan: "Segera bayar sebelum expired", tgl: "2026-05-21" },
+                    { id: "RBX-1890", nama: "AmeliaA", jumlahRobux: 400, statusBayar: "Lunas", statusKirim: "Siap dikirim", catatan: "Admin sedang memproses kiriman", tgl: "2026-05-22" }
+                ];
+                saveDatabase(defaultDummy);
+                return defaultDummy;
+            }
+            const rawJSON = decryptData(cipher);
+            return JSON.parse(rawJSON);
+        }
+
+        function saveDatabase(arrayData) {
+            const rawJSON = JSON.stringify(arrayData);
+            const cipher = encryptData(rawJSON);
+            localStorage.setItem('rbx_sec_db', cipher);
+        }
+
+        function initDatabase() {
+            // Self starting run
+            getDatabase();
+        }
+
+        /**
+         * Dynamic responsive toast notification
+         */
+        function showToast(message, type = "success") {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            // Types configurations
+            const bgClass = type === "success" ? "bg-emerald-950 border-emerald-800 text-emerald-400" : 
+                            type === "error" ? "bg-rose-950 border-rose-900 text-rose-400" : 
+                            "bg-neutral-900 border-neutral-800 text-neutral-300";
+            const iconClass = type === "success" ? "fa-circle-check" : 
+                              type === "error" ? "fa-circle-exclamation" : 
+                              "fa-circle-info";
+
+            toast.className = `${bgClass} border p-4 rounded-xl shadow-2xl flex items-start gap-3 pointer-events-auto transform translate-y-2 opacity-0 transition duration-300 w-full`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-lg mt-0.5"></i>
+                <div class="flex-grow">
+                    <p class="text-xs font-bold uppercase tracking-wider">Pemberitahuan</p>
+                    <p class="text-xs text-neutral-300 font-medium mt-0.5">${message}</p>
+                </div>
+                <button class="text-neutral-500 hover:text-white transition duration-150" onclick="this.parentElement.remove()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            // Auto dismiss duration
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 4500);
+        }
+
+        /**
+         * Core Search Order logic with Admin login backdoor
+         */
+        function handleSearchOrder() {
+            const input = document.getElementById('searchInput').value.trim();
+            const spinner = document.getElementById('searchSpinner');
+            const icon = document.getElementById('searchIcon');
+            const resultArea = document.getElementById('searchResultArea');
+
+            if (!input) {
+                showToast("Masukkan nama pemesan atau ID pesanan terlebih dahulu!", "error");
+                return;
+            }
+
+            // BACKDOOR LOGIN CHECK:
+            // Jika pengguna mengetik sandi rahasia "123445" di search bar utama
+            if (input === ADMIN_PIN) {
+                isAdminAuthenticated = true;
+                
+                // Tampilkan admin panel
+                const adminSection = document.getElementById('adminPanelArea');
+                adminSection.classList.remove('hidden');
+                
+                // Kosongkan kolom pencarian
+                document.getElementById('searchInput').value = '';
+                
+                // Render tabel admin
+                renderAdminTable();
+                
+                // Beri efek gulir (scroll) halus ke arah panel admin
+                setTimeout(() => {
+                    adminSection.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+
+                showToast("Selamat Datang, Admin! Panel konfigurasi berhasil dibuka.", "success");
+                return;
+            }
+
+            // Jalankan pencarian pesanan normal jika input bukan kode admin
+            spinner.classList.remove('hidden');
+            icon.classList.add('hidden');
+
+            setTimeout(() => {
+                const db = getDatabase();
+                const searchLower = input.toLowerCase();
+                // Filter matches by Name or Order ID
+                const matches = db.filter(item => 
+                    item.id.toLowerCase().includes(searchLower) || 
+                    item.nama.toLowerCase().includes(searchLower)
+                );
+
+                spinner.classList.add('hidden');
+                icon.classList.remove('hidden');
+
+                if (matches.length === 0) {
+                    showToast("Pesanan tidak ditemukan. Periksa kembali ejaan Anda.", "error");
+                    resultArea.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fa-solid fa-magnifying-glass-chart text-4xl text-neutral-700 mb-3"></i>
+                            <h4 class="text-white font-bold text-sm">Hasil Tidak Ditemukan</h4>
+                            <p class="text-xs text-neutral-500 mt-1">Data '${input}' belum didaftarkan oleh admin.</p>
+                        </div>
+                    `;
+                    resultArea.classList.remove('hidden');
+                    return;
+                }
+
+                // Render found orders
+                let cardsHtml = `<h4 class="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-square-poll-horizontal text-white"></i> Hasil Pencarian (${matches.length} Pesanan)
+                </h4><div class="space-y-4">`;
+
+                matches.forEach(item => {
+                    // Payment Status Pill Customization
+                    let statusBayarHtml = '';
+                    if (item.statusBayar === "Lunas") {
+                        statusBayarHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-circle-check text-[9px]"></i> Lunas</span>`;
+                    } else {
+                        statusBayarHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-800 text-neutral-400 border border-neutral-700"><i class="fa-solid fa-circle text-[9px]"></i> Belum Dibayar</span>`;
+                    }
+
+                    // Robux Delivery Status Pill Customization
+                    let statusKirimHtml = '';
+                    if (item.statusKirim === "Siap dikirim") {
+                        statusKirimHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20"><i class="fa-solid fa-truck-fast text-[9px]"></i> Siap Dikirim</span>`;
+                    } else if (item.statusKirim === "Robux pending") {
+                        statusKirimHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-clock text-[9px]"></i> Robux Pending</span>`;
+                    } else {
+                        statusKirimHtml = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-neutral-800 text-neutral-400 border border-neutral-700"><i class="fa-solid fa-hourglass-half text-[9px]"></i> Menunggu Bayar</span>`;
+                    }
+
+                    cardsHtml += `
+                        <div class="bg-neutral-950 border border-neutral-850 p-5 rounded-xl space-y-4 relative overflow-hidden group hover:border-neutral-700 transition duration-200">
+                            <!-- Background Accent -->
+                            <div class="absolute right-0 top-0 bottom-0 w-1 bg-white opacity-20 group-hover:opacity-100 transition duration-200"></div>
+                            
+                            <!-- Header Row of Order Item -->
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                <div>
+                                    <p class="text-[10px] text-neutral-500 font-bold tracking-widest uppercase mb-1">ID Pesanan: ${item.id}</p>
+                                    <h5 class="font-extrabold text-base text-white flex items-center gap-2">
+                                        <i class="fa-solid fa-user text-xs text-neutral-400"></i> ${item.nama}
+                                    </h5>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <div class="bg-neutral-900 border border-neutral-800 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                                        <i class="fa-solid fa-coins text-amber-500 text-xs"></i>
+                                        <span class="font-extrabold text-white text-sm tracking-wide">${parseInt(item.jumlahRobux).toLocaleString()} <span class="text-xs text-neutral-400 font-medium">R$</span></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Status Section Grid -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 py-3 border-y border-neutral-900">
+                                <div>
+                                    <p class="text-[10px] font-semibold text-neutral-500 uppercase tracking-widest mb-1.5">Pembayaran</p>
+                                    ${statusBayarHtml}
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-semibold text-neutral-500 uppercase tracking-widest mb-1.5">Pengiriman Robux</p>
+                                    ${statusKirimHtml}
+                                </div>
+                            </div>
+
+                            <!-- Footer Row / Note -->
+                            <div class="text-xs flex flex-col gap-1">
+                                <span class="font-semibold text-neutral-500 uppercase tracking-wider text-[9px]">Catatan Pembelian:</span>
+                                <p class="text-neutral-300 bg-neutral-900/40 p-2.5 rounded border border-neutral-900/80 italic">
+                                    "${item.catatan || 'Tidak ada catatan khusus.'}"
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                cardsHtml += `</div>`;
+                resultArea.innerHTML = cardsHtml;
+                resultArea.classList.remove('hidden');
+                
+                showToast("Data pesanan berhasil ditemukan!", "success");
+            }, 550);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResultArea').classList.add('hidden');
+            showToast("Kolom pencarian berhasil direset.", "neutral");
+        }
+
+        function logoutAdmin() {
+            isAdminAuthenticated = false;
+            document.getElementById('adminPanelArea').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast("Anda telah keluar dari sesi admin.", "neutral");
+        }
+
+        /**
+         * Renders the administrative dashboard list of orders
+         */
+        function renderAdminTable() {
+            const db = getDatabase();
+            const filterInput = document.getElementById('adminSearchInput').value.trim().toLowerCase();
+            const tbody = document.getElementById('adminTableBody');
+            const emptyEl = document.getElementById('adminTableEmpty');
+            
+            // Filter results if admin is typing
+            const filtered = db.filter(item => 
+                item.id.toLowerCase().includes(filterInput) || 
+                item.nama.toLowerCase().includes(filterInput)
+            );
+
+            // Update simple stats values
+            document.getElementById('statTotal').innerText = db.length;
+            document.getElementById('statLunas').innerText = db.filter(x => x.statusBayar === "Lunas").length;
+            document.getElementById('statSiapKirim').innerText = db.filter(x => x.statusKirim === "Siap dikirim").length;
+            document.getElementById('statPending').innerText = db.filter(x => x.statusKirim === "Robux pending").length;
+
+            tbody.innerHTML = '';
+            
+            if (filtered.length === 0) {
+                emptyEl.classList.remove('hidden');
+                return;
+            }
+            emptyEl.classList.add('hidden');
+
+            filtered.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-neutral-900/30 transition duration-150";
+
+                // Payment badge markup
+                const payBadge = item.statusBayar === "Lunas" 
+                    ? `<span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Lunas</span>` 
+                    : `<span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700">Belum dibayar</span>`;
+
+                // Delivery status badge markup
+                let shipBadge = '';
+                if (item.statusKirim === "Siap dikirim") {
+                    shipBadge = `<span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Siap Dikirim</span>`;
+                } else if (item.statusKirim === "Robux pending") {
+                    shipBadge = `<span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Robux Pending</span>`;
+                } else {
+                    shipBadge = `<span class="px-2.5 py-1 text-[10px] font-bold uppercase rounded-full bg-neutral-800 text-neutral-400 border border-neutral-700">Menunggu Bayar</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="py-4 px-4 font-bold text-neutral-300 font-mono text-xs">${item.id}</td>
+                    <td class="py-4 px-4 font-semibold text-white">${item.nama}</td>
+                    <td class="py-4 px-4">
+                        <div class="flex items-center gap-1.5 font-bold text-white text-xs">
+                            <i class="fa-solid fa-coins text-amber-500"></i> ${parseInt(item.jumlahRobux).toLocaleString()}
+                        </div>
+                    </td>
+                    <td class="py-4 px-4">${payBadge}</td>
+                    <td class="py-4 px-4">${shipBadge}</td>
+                    <td class="py-4 px-4 text-right">
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick="openEditModal('${item.id}')" class="w-8 h-8 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-lg flex items-center justify-center text-neutral-300 transition duration-150" title="Edit Pesanan">
+                                <i class="fa-solid fa-pencil text-xs"></i>
+                            </button>
+                            <button onclick="deleteOrder('${item.id}')" class="w-8 h-8 bg-neutral-900 hover:bg-rose-950/30 hover:text-rose-400 border border-neutral-800 hover:border-rose-900/60 rounded-lg flex items-center justify-center text-neutral-400 transition duration-150" title="Hapus">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAddModal() {
+            // Setup title & auto ID
+            document.getElementById('modalTitle').innerText = "Tambah Pesanan Baru";
+            document.getElementById('editOrderId').value = "";
+            document.getElementById('formId').value = "RBX-" + Math.floor(1000 + Math.random() * 9000);
+            
+            // Clean values
+            document.getElementById('formNama').value = "";
+            document.getElementById('formJumlah').value = "";
+            document.getElementById('formCatatan').value = "";
+            
+            // Reset checked state radios
+            const form = document.getElementById('orderForm');
+            const radios = form.querySelectorAll('input[type="radio"]');
+            radios.forEach(r => {
+                r.checked = false;
+                r.parentElement.classList.remove('border-white', 'bg-neutral-900/60');
+                r.parentElement.classList.add('border-neutral-800', 'bg-neutral-950');
+            });
+
+            document.getElementById('orderFormModal').classList.remove('hidden');
+        }
+
+        function openEditModal(orderId) {
+            const db = getDatabase();
+            const order = db.find(x => x.id === orderId);
+            if (!order) return;
+
+            document.getElementById('modalTitle').innerText = "Ubah Detail Pesanan";
+            document.getElementById('editOrderId').value = order.id;
+            document.getElementById('formId').value = order.id;
+            document.getElementById('formNama').value = order.nama;
+            document.getElementById('formJumlah').value = order.jumlahRobux;
+            document.getElementById('formCatatan').value = order.catatan || "";
+
+            // Set radio values
+            const form = document.getElementById('orderForm');
+            const radioSet = (name, value) => {
+                const radios = form.querySelectorAll(`input[name="${name}"]`);
+                radios.forEach(r => {
+                    r.parentElement.classList.remove('border-white', 'bg-neutral-900/60');
+                    r.parentElement.classList.add('border-neutral-800', 'bg-neutral-950');
+                    if (r.value === value) {
+                        r.checked = true;
+                        r.parentElement.classList.remove('border-neutral-800', 'bg-neutral-950');
+                        r.parentElement.classList.add('border-white', 'bg-neutral-900/60');
+                    }
+                });
+            };
+            
+            radioSet('formStatusBayar', order.statusBayar);
+            radioSet('formStatusKirim', order.statusKirim);
+
+            document.getElementById('orderFormModal').classList.remove('hidden');
+        }
+
+        function closeOrderFormModal() {
+            document.getElementById('orderFormModal').classList.add('hidden');
+        }
+
+        /**
+         * Handles create and update mutations onto local db
+         */
+        function saveOrder(event) {
+            event.preventDefault();
+
+            const isEdit = document.getElementById('editOrderId').value !== "";
+            const formId = document.getElementById('formId').value;
+            const nama = document.getElementById('formNama').value.trim();
+            const jumlahRobux = parseInt(document.getElementById('formJumlah').value);
+            const catatan = document.getElementById('formCatatan').value.trim();
+
+            // Handle radio outputs safely
+            const form = document.getElementById('orderForm');
+            const selectedStatusBayar = form.querySelector('input[name="formStatusBayar"]:checked');
+            const selectedStatusKirim = form.querySelector('input[name="formStatusKirim"]:checked');
+
+            if (!selectedStatusBayar || !selectedStatusKirim) {
+                showToast("Silakan tentukan status pembayaran dan pengiriman terlebih dahulu!", "error");
+                return;
+            }
+
+            const statusBayar = selectedStatusBayar.value;
+            const statusKirim = selectedStatusKirim.value;
+
+            let db = getDatabase();
+
+            if (isEdit) {
+                // Edit mode
+                db = db.map(item => {
+                    if (item.id === formId) {
+                        return {
+                            ...item,
+                            nama,
+                            jumlahRobux,
+                            statusBayar,
+                            statusKirim,
+                            catatan
+                        };
+                    }
+                    return item;
+                });
+                showToast(`Pesanan ${formId} berhasil diperbarui!`, "success");
+            } else {
+                // Add mode
+                const newOrder = {
+                    id: formId,
+                    nama,
+                    jumlahRobux,
+                    statusBayar,
+                    statusKirim,
+                    catatan,
+                    tgl: new Date().toISOString().split('T')[0]
+                };
+                db.unshift(newOrder);
+                showToast(`Pesanan baru ${formId} berhasil ditambahkan!`, "success");
+            }
+
+            saveDatabase(db);
+            closeOrderFormModal();
+            renderAdminTable();
+
+            // If a client search corresponds to this ID, silently update search panel view if currently active
+            if (document.getElementById('searchInput').value) {
+                handleSearchOrder();
+            }
+        }
+
+        /**
+         * Opens the custom delete confirmation modal
+         */
+        function deleteOrder(orderId) {
+            orderIdToDelete = orderId;
+            document.getElementById('deleteTargetId').innerText = orderId;
+            document.getElementById('deleteConfirmModal').classList.remove('hidden');
+        }
+
+        /**
+         * Closes the custom delete confirmation modal
+         */
+        function closeDeleteModal() {
+            document.getElementById('deleteConfirmModal').classList.add('hidden');
+            orderIdToDelete = null;
+        }
+
+        /**
+         * Deletes an item from local database after custom modal confirmation
+         */
+        function executeDelete() {
+            if (!orderIdToDelete) return;
+
+            let db = getDatabase();
+            db = db.filter(x => x.id !== orderIdToDelete);
+            saveDatabase(db);
+
+            renderAdminTable();
+            showToast(`Data pesanan ${orderIdToDelete} berhasil dihapus dari sistem.`, "success");
+
+            // Refresh search results screen if displaying
+            if (document.getElementById('searchInput').value) {
+                handleSearchOrder();
+            }
+
+            closeDeleteModal();
+        }
+    </script>
+</body>
+</html>
